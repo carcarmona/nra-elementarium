@@ -80,10 +80,14 @@
             "(12) DOBLE GOLPE: Una vez por ronda, un jugador puede jugar dos cartas a la vez. A la hora de dar la vuelta a otras cartas, esas cartas se consideran CAs a la vez, no se considera que se jueguen una después de la otra, por lo que solo activarán el efecto de la cadena una vez."
         ];
 
+        function tirarDados() {
+            return Math.floor(Math.random() * 6) + 1;
+        }
+
         function sortear() {
             const container = document.getElementById('container');
             const resultDiv = document.getElementById('result');
-            let countdown = 3;
+            let countdown = 5;
 
             container.innerHTML = `<div class="countdown" id="countdown">${countdown}</div>`;
             const countdownDiv = document.getElementById('countdown');
@@ -93,11 +97,13 @@
                 countdownDiv.innerText = countdown;
                 if (countdown === 0) {
                     clearInterval(interval);
-                    const index = Math.floor(Math.random() * reglas.length);
+                    const dado1 = tirarDados();
+                    const dado2 = tirarDados();
+                    const resultado = dado1 + dado2;
                     container.innerHTML = `
                         <h1>Sortear Regla</h1>
                         <button onclick="sortear()">Sortear</button>
-                        <div class="result" id="result">${reglas[index]}</div>
+                        <div class="result" id="result">${reglas[resultado - 2]}</div>
                     `;
                     document.getElementById('result').classList.add('show');
                 }
