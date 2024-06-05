@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sortear Reglas</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(to bottom, #a8e6cf, #dcedc1, #ffd3b6, #ffaaa5, #ff8b94);
+            margin: 0;
+            overflow: hidden;
+        }
+        .container {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            max-width: 400px;
+            text-align: center;
+            margin: 20px;
+            transition: all 0.3s ease-in-out;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #4b2e83;
+        }
+        button {
+            background-color: #4b2e83;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #321d59;
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #333;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        .result.show {
+            opacity: 1;
+        }
+        .countdown {
+            font-size: 40px;
+            color: #ff8b94;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="container">
+        <h1>Sortear Regla</h1>
+        <button onclick="sortear()">Sortear</button>
+        <div class="result" id="result"></div>
+    </div>
+    <script>
+        const reglas = [
+            "(2) LIMITADO: Se modifica la siguiente regla: Al final del turno, NO robas cartas.",
+            "(3) ATAQUE SORPRESA: La primera carta que juegue cada jugador deberá ser colocada BOCA ABAJO en una ESQUINA del tablero. A efectos de partida, los laterales de esa carta, como no se conocen todavía, no se cuentan. Cuando un jugador no pueda colocar ninguna carta sobre el tablero, ese jugador da la vuelta a la carta que tenía boca abajo y se considerará CA en ese momento.",
+            "(4) ZONA 4 DE BATALLA: Pide a Miguel tres tableros elementarium disponibles. El Jugador Inicial descarta uno de los tres tableros que Miguel le ha dado, y después el otro jugador descarta un segundo. El tablero elementarium que se jugará será el que no haya descartado ninguno de los dos jugadores. (Más bajo tienes alguno de ellos disponibles)",
+            "(5) MUNDO LIBRE: En la preparación de la partida, se quita el tablero de la zona de juego. Después de colocar la primera CA, cada jugador tiene que colocar su CA adyacente a una CC de cualquier jugador pero NO necesariamente tiene que respetar la cuadrícula de 3x3, por lo que las cartas podrán extenderse vertical y horizontalmente cuanto se quiera.",
+            "(6) CATÁSTROFE: La partida se juega sin tener en cuenta los elementos de las cartas, por lo que NO son NI fuertes NI débiles contra otros elementos.",
+            "(7) DUELO A MUERTE : Antes de empezar la partida cada jugador retira una carta de su mazo de forma aleatoria y la coloca boca abajo y sin mirarla. No se jugará con esa carta en ninguna de las rondas, incluso si hay que jugar una tercera. Al final de la partida, el ganador se quedará para siempre con la carta de su oponente excepto si contiene al menos una X entre sus valores, en cuyo caso el jugador que perdió recupera esa carta, pero tendrá que ELEGIR DOS cartas de su mazo para dárselas (no podrá elegir ninguna que tuviera al final de la partida en el banquillo). Si se fuera a jugar una tercera ronda, esta regla se mantiene activa y se sumará a la NRA que salga. Y si esta NRA vuelve a salir se ignora su efecto, por lo que no se perdería una segunda carta.",
+            "(8) EQUILIBRIO: Se modifica la siguiente regla de esta forma: Si la CA tiene un valor IGUAL o SUPERIOR al de la carta que había en el tablero, la CC se gira 180º para que pase a ser propiedad del jugador activo.",
+            "(9) ARENA DE JUEGO: En la preparación de la partida, se quita el tablero de la zona de juego. Después de colocar la primera CA, cada jugador tiene que colocar su CA adyacente a una CC de cualquier jugador pero tiene que respetar la cuadrícula de 3x3, por lo que las cartas solo podrán extenderse vertical y horizontalmente un máximo de tres.",
+            "(10) ZONA 10 DE BATALLA: Pide a Miguel tres tableros elementarium disponibles. El Jugador NO Inicial descarta uno de los tres tableros que Miguel le ha dado, y después el Jugador Inicial descarta un segundo. El tablero elementarium que se jugará será el que no haya descartado ninguno de los dos jugadores. (Más bajo tienes alguno de ellos disponibles)",
+            "(11) DOBLE FUERZA: Se modifica la siguiente regla: Si al colocar la CA hay una CC de tu oponente ortogonal y adyacente se SUMAN los valores de ese lado con su opuesto de la CC y se comparan con la SUMA de los valores del lado enfrentado y su opuesto de la CA. Si la CA tiene un valor SUPERIOR a la SUMA de los lados de la carta que había en el tablero, la CC se gira 180º para que pase a ser propiedad del jugador activo. Ejemplo: Una CC tiene un 3 en un lado, y en su lado opuesto un 7 (cuya suma vale 10) y la CA tiene en el lado enfrentado un 6 y en su opuesto un 5 (cuya suma vale 11), la CA da la vuelta a la CC.",
+            "(12) DOBLE GOLPE: Una vez por ronda, un jugador puede jugar dos cartas a la vez. A la hora de dar la vuelta a otras cartas, esas cartas se consideran CAs a la vez, no se considera que se jueguen una después de la otra, por lo que solo activarán el efecto de la cadena una vez."
+        ];
+
+        function sortear() {
+            const container = document.getElementById('container');
+            const resultDiv = document.getElementById('result');
+            let countdown = 3;
+
+            container.innerHTML = `<div class="countdown" id="countdown">${countdown}</div>`;
+            const countdownDiv = document.getElementById('countdown');
+
+            const interval = setInterval(() => {
+                countdown--;
+                countdownDiv.innerText = countdown;
+                if (countdown === 0) {
+                    clearInterval(interval);
+                    const index = Math.floor(Math.random() * reglas.length);
+                    container.innerHTML = `
+                        <h1>Sortear Regla</h1>
+                        <button onclick="sortear()">Sortear</button>
+                        <div class="result" id="result">${reglas[index]}</div>
+                    `;
+                    document.getElementById('result').classList.add('show');
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
